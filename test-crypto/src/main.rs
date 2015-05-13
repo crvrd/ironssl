@@ -6,6 +6,7 @@
 
 extern crate crypto;
 extern crate rand;
+extern crate cryptoimpl;
 
 use crypto::{ symmetriccipher, buffer, aes, blockmodes };
 use crypto::buffer::{ ReadBuffer, WriteBuffer, BufferResult };
