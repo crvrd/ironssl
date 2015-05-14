@@ -6,4 +6,6 @@ authors = ["David Greer <greerdavidc@gmail.com>"]
 [dependencies]
 rust-crypto = "*"
 rand = "*"
-crypto-impl = "*"
+
+[dependencies.cryptoimpl]
+path = "../cryptoimpl"

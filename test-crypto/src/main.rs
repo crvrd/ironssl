@@ -113,6 +113,7 @@ fn main() {
 
     let mut key: [u8; 32] = [0; 32];
     let mut iv: [u8; 16] = [0; 16];
+    let mut test: [u8; 16] = [0; 16];
 
     // In a real program, the key and iv may be determined
     // using some other mechanism. If a password is to be used
@@ -123,6 +124,9 @@ fn main() {
     let mut rng = rand::thread_rng();
     rng.fill_bytes(&mut key);
     rng.fill_bytes(&mut iv);
+    rng.fill_bytes(&mut test);
+
+    cryptoimpl::aes::encrypt_block(&mut iv, &mut test);
 
     let encrypted_data = encrypt(message.as_bytes(), &key, &iv).ok().unwrap();
     let decrypted_data = decrypt(&encrypted_data[..], &key, &iv).ok().unwrap();

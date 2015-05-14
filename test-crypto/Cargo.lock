@@ -2,9 +2,14 @@
 name = "test-crypto"
 version = "0.1.0"
 dependencies = [
+ "cryptoimpl 0.1.0",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.31 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "cryptoimpl"
+version = "0.1.0"
 
 [[package]]
 name = "gcc"
