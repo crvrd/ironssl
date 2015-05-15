@@ -130,7 +130,7 @@ fn schedule_keys(key: & [u8; 16]) -> [[u8; 16]; 11] {
     roundkeys
 }
 
-pub fn encrypt_block(data: &mut[u8; 16], key: &mut [u8; 16]) {
+pub fn encrypt_block(data: &mut[u8; 16], key: &[u8; 16]) {
     let roundkeys: [[u8; 16]; 11] = schedule_keys(key);
 
     add_round_key(data, &roundkeys[0]);
@@ -147,7 +147,7 @@ pub fn encrypt_block(data: &mut[u8; 16], key: &mut [u8; 16]) {
     add_round_key(data, &roundkeys[roundkeys.len()-1]);
 }
 
-pub fn decrypt_block(data: &mut[u8; 16], key: &mut [u8; 16]) {
+pub fn decrypt_block(data: &mut[u8; 16], key: &[u8; 16]) {
     let roundkeys: [[u8; 16]; 11] = schedule_keys(key);
 
     add_round_key(data, &roundkeys[roundkeys.len()-1]);
@@ -271,4 +271,67 @@ pub fn test_pkcs_pad() {
         }
     }
     println!("\n");
+}
+
+pub fn cbc_encrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
+    let mut vdata: Vec<u8> = Vec::new();
+    let mut finaldata: Vec<u8> = Vec::new();
+    let mut blockdata: [u8; 16] = [0; 16];
+    let mut key: [u8; 16] = [0; 16];
+    let mut old: [u8; 16] = [0; 16];
+
+    for i in 0..data.len() {
+        vdata.push(data[i]);
+    }
+    for i in 0..16 {
+        key[i] = k[i];
+        old[i] = iv[i];
+    }
+
+    pkcs_pad(&mut vdata);
+
+    for i in 0..(vdata.len()/16) {
+        for j in 0..16 {
+            blockdata[j] = vdata[i*16 + j] ^ old[j];
+        }
+        encrypt_block(&mut blockdata, &key);
+        for j in 0..16 {
+            finaldata.push(blockdata[j]);
+            old[j] = blockdata[j];
+        }
+    }
+    finaldata
+}
+
+pub fn cbc_decrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
+    let mut vdata: Vec<u8> = Vec::new();
+    let mut finaldata: Vec<u8> = Vec::new();
+    let mut blockdata: [u8; 16] = [0; 16];
+    let mut tmpdata: [u8; 16] = [0; 16];
+    let mut key: [u8; 16] = [0; 16];
+    let mut old: [u8; 16] = [0; 16];
+
+    for i in 0..data.len() {
+        vdata.push(data[i]);
+    }
+    for i in 0..16 {
+        key[i] = k[i];
+        old[i] = iv[i];
+    }
+
+    for i in 0..(vdata.len()/16) {
+        for j in 0..16 {
+            blockdata[j] = vdata[i*16 + j];
+            tmpdata[j] = blockdata[j];
+        }
+        decrypt_block(&mut blockdata, &key);
+        for j in 0..16 {
+            finaldata.push(blockdata[j] ^ old[j]);
+            old[j] = tmpdata[j];
+        }
+    }
+
+    pkcs_unpad(&mut finaldata);
+
+    finaldata
 }
