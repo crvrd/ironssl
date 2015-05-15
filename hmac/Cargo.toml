@@ -1,8 +1,0 @@
-[package]
-name = "hmac"
-version = "0.1.0"
-authors = ["anitgandhi <anitgandhi@gmail.com>"]
-
-[dependencies]
-shaman = "*"
-rustc-serialize = "*"
