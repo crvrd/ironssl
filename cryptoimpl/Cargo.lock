@@ -1,4 +1,4 @@
 [root]
-name = "crypto-impl"
+name = "cryptoimpl"
 version = "0.1.0"
 
