@@ -41,8 +41,14 @@ fn encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetricciphe
 }
 
 fn main() {
+
+    /*****************************************************
+                            AES 
+    *****************************************************/
     let message = "Cry Havoc, and let slip the dogs of war";
     let password = "testpass";
+
+    println!("\nRunning AES test...");
 
     let mut key: [u8; 16] = [0; 16];
     let mut salt: [u8; 16] = [0; 16];
@@ -60,5 +66,48 @@ fn main() {
     let encrypted_data = cryptoimpl::aes::cbc_encrypt(message.as_bytes(), &key, &iv);
 
     assert!(&reference_enc[..] == &encrypted_data[..]);
-    println!("Test completed successfully");
+    println!("AES test completed successfully");
+
+    /*****************************************************
+                        Diffie-Helman
+    *****************************************************/
+
+    println!("\nRunning Diffie Helman test...");
+
+    // pre-shared info
+    let g = 5;
+    let p = 23;
+
+    // alice's info
+    let a_key = 6;
+    let a_exp = cryptoimpl::dh::modexp(g, a_key, p); // sends to bob
+
+    // bob's info
+    let b_key = 15;
+    let b_exp = cryptoimpl::dh::modexp(g, b_key, p);// sends to alice
+
+    let shared_1 = cryptoimpl::dh::compute_shared_key(p, g, a_key, b_exp);
+    let shared_2 = cryptoimpl::dh::compute_shared_key(p, g, b_key, a_exp);
+
+    assert!(shared_1 == shared_2);
+    println!("Diffie-Helman test completed successfully");
+
+    /*****************************************************
+                             HMAC
+    *****************************************************/
+    println!("\nRunning HMAC test...");
+
+    let mut key: Vec<u8> = b"testkey".to_vec();
+    let mut message: Vec<u8> = b"testmsg".to_vec();
+    let ret = cryptoimpl::hmac::hmac(&mut key, &mut message);
+
+    println!("Result of HMAC test:");
+
+    //print as hex string
+    for i in ret.iter()
+    {
+        print!("{:x}", i);
+    }
+    println!("");
+
 }

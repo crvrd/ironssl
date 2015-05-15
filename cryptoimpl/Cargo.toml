@@ -2,3 +2,9 @@
 name = "cryptoimpl"
 version = "0.1.0"
 authors = ["Anit, Bart, Bo, David"]
+
+[dependencies]
+shaman = "*"
+rustc-serialize = "*"
+rand = "*"
+num = "*"
