@@ -6,7 +6,7 @@ use std::io::Write;
 
 fn main() {
 	
-	let mut stream = TcpStream::connect("127.0.0.1:5000").unwrap();
+	let mut stream = TcpStream::connect("127.0.0.1:4000").unwrap();
 
 	// let mut buf1 = "hello";
 	stream.write(b"hello");
