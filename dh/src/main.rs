@@ -142,6 +142,12 @@ fn main()
 	let shared_1 = compute_shared_key(p, g, a_key, b_exp);
 	let shared_2 = compute_shared_key(p, g, b_key, a_exp);
 
-	println!("{} {}", shared_1, shared_2);
+	if shared_1 == shared_2
+	{
+		println!("Shared key established: {}", shared_1);
+	}
+
+	println!("Alice's Computed Shared Key: {}", shared_1);
+	println!("Bob's Computed Shared Key: {}", shared_2);
 	
 }

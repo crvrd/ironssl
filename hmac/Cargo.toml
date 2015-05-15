@@ -1,8 +1,8 @@
 [package]
 name = "hmac"
-version = "0.0.1"
-authors = ["bkosciarz <bart.kosciarz@gmail.com>"]
+version = "0.1.0"
+authors = ["anitgandhi <anitgandhi@gmail.com>"]
 
 [dependencies]
-rust-crypto = "*"
-rand = "*"
+shaman = "*"
+rustc-serialize = "*"
