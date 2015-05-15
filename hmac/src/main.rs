@@ -10,7 +10,7 @@ static BLOCK_SIZE: usize = 32; // since we're using sha256, block size is 32
 
 fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 
-	let key_length = key.len();
+	let mut key_length = key.len();
 
 	let mut sha = shaman::sha2::Sha256::new();
 
@@ -18,7 +18,7 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	if key_length > BLOCK_SIZE
 	{
 		sha.input(key.as_ref());
-		let mut key_digest : [u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		let mut key_digest : [u8; 32] = [0; 32];
 		sha.result(&mut key_digest);
 
 		// need to copy this into key
@@ -29,6 +29,10 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 
 		// truncate key to only BLOCK_SIZE
 		key.truncate(BLOCK_SIZE);
+
+		// Need this because usize can't be negative 
+		// when we do key.reserve()
+		key_length = BLOCK_SIZE;
 	}
 
 	// pad the key if it's too small
@@ -67,7 +71,7 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	// hash this concatenation of i_key and message
 	sha.reset();
 	sha.input(inner.as_ref());
-	let mut inner_hash_digest : [u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let mut inner_hash_digest : [u8; 32] = [0; 32];
 	sha.result(&mut inner_hash_digest);
 	// copy and truncate
 	for _i in 0..BLOCK_SIZE
@@ -75,7 +79,6 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 		inner[_i] = inner_hash_digest[_i];
 	}
 	inner.truncate(BLOCK_SIZE);
-
 
 	// Now concatenate o_keys + inner
 	for z in inner.iter()
@@ -88,7 +91,7 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 
 	sha.reset();
 	sha.input(o_keys.as_ref());
-	let mut hmac_digest : [u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let mut hmac_digest : [u8; 32] = [0; 32];
 	sha.result(&mut hmac_digest);
 
 	// copy and truncate
@@ -106,7 +109,7 @@ fn main () {
 
 	// Command line input doesn't want to work, so try and figure out a way for user input similar to scanf
 
-    let mut key: Vec<u8> = b"gandhi".to_vec();
+    let mut key: Vec<u8> = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_vec();
     let mut message: Vec<u8> = b"hello".to_vec();
 	let ret = hmac(&mut key, &mut message);
 
