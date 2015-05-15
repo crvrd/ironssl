@@ -6,7 +6,7 @@ extern crate shaman;
 use self::shaman::digest::Digest;
 //use rustc_serialize::hex;
 
-static BLOCK_SIZE: usize = 32; // since we're using sha256, block size is 32
+static BLOCK_SIZE: usize = 64; // since we're using sha256, block size is 32
 
 fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 
@@ -15,10 +15,10 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	let mut sha = shaman::sha2::Sha256::new();
 
 	// hash the key and truncate if it's too long
-	if key_length > BLOCK_SIZE
+	if key_length > BLOCK_SIZE/2
 	{
 		sha.input(key.as_ref());
-		let mut key_digest : [u8; 32] = [0; 32];
+		let mut key_digest : [u8; 64] = [0; 64];
 		sha.result(&mut key_digest);
 
 		// need to copy this into key
@@ -57,11 +57,10 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	// have to append manually because rust sucks
 
 	// append i_keys manually
-	for x in i_keys.iter()
+	for x in 0..BLOCK_SIZE
 	{
-		inner.push(*x);
+		inner.push(i_keys[x]);
 	}
-
 	// concatenate message manually
 	for y in message.iter()
 	{
@@ -71,15 +70,20 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	// hash this concatenation of i_key and message
 	sha.reset();
 	sha.input(inner.as_ref());
-	let mut inner_hash_digest : [u8; 32] = [0; 32];
+	let mut inner_hash_digest : [u8; 64] = [0; 64];
+
+   /* for a in 0..BLOCK_SIZE
+    {
+        inner_hash_digest.push(0);
+    }*/
+
 	sha.result(&mut inner_hash_digest);
 	// copy and truncate
 	for _i in 0..BLOCK_SIZE
 	{
 		inner[_i] = inner_hash_digest[_i];
 	}
-	inner.truncate(BLOCK_SIZE);
-
+	inner.truncate(BLOCK_SIZE/2);
 	// Now concatenate o_keys + inner
 	for z in inner.iter()
 	{
@@ -91,7 +95,7 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 
 	sha.reset();
 	sha.input(o_keys.as_ref());
-	let mut hmac_digest : [u8; 32] = [0; 32];
+	let mut hmac_digest : [u8; 64] = [0; 64];
 	sha.result(&mut hmac_digest);
 
 	// copy and truncate
@@ -99,7 +103,7 @@ fn hmac (key : &mut Vec<u8>, message: &mut Vec<u8>) -> Vec<u8> {
 	{
 		ret_val.push(hmac_digest[_i]);
 	}
-	ret_val.truncate(BLOCK_SIZE);
+	ret_val.truncate(BLOCK_SIZE/2);
 
 	return ret_val;
 }
@@ -109,14 +113,17 @@ fn main () {
 
 	// Command line input doesn't want to work, so try and figure out a way for user input similar to scanf
 
-    let mut key: Vec<u8> = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_vec();
-    let mut message: Vec<u8> = b"hello".to_vec();
+    let mut key: Vec<u8> = b"gkeythisisaverylongkeythisisaverylongkeygkeythisisaverylongkeythisisaverylongkey".to_vec();
+    let mut message: Vec<u8> = b"thisisatest".to_vec();
 	let ret = hmac(&mut key, &mut message);
 
 	//print as hex string
 	for i in ret.iter()
 	{
-		print!("{:x}", i);
+		print!("{:02x}", i);
+ //       let formatted = format!("{:.*}",1,i);
+//		println!("{}", formatted);
 	}
+    print!("\n");
 
 }
