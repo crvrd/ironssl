@@ -112,8 +112,12 @@ fn main() {
     let message = "Cry Havoc, and let slip the dogs of war!";
 
     let mut key: [u8; 32] = [0; 32];
-    let mut iv: [u8; 16] = [0; 16];
-    let mut test: [u8; 16] = [0; 16];
+    let mut test: [u8; 16] = [0xF0, 0xDD, 0xC8, 0x54, 0xB7, 0x6B, 0x67, 0xB3, 0x87, 0x38, 0xE6, 0x5, 0x36, 0x82, 0xD9, 0xA2];
+    let mut iv: [u8; 16] = [0xdb, 0xf2, 0x01, 0xd4, 
+                            0x13, 0x0a, 0x01, 0xd4, 
+                            0x53, 0x22, 0x01, 0xd4, 
+                            0x45, 0x5c, 0x01, 0xd5];
+    let mut tmp: [u8; 16] = [0; 16];
 
     // In a real program, the key and iv may be determined
     // using some other mechanism. If a password is to be used
@@ -123,10 +127,26 @@ fn main() {
     // iv are just random values.
     let mut rng = rand::thread_rng();
     rng.fill_bytes(&mut key);
-    rng.fill_bytes(&mut iv);
-    rng.fill_bytes(&mut test);
+    //rng.fill_bytes(&mut iv);
+    //rng.fill_bytes(&mut test);
+
+    cryptoimpl::aes::run_tests(&mut iv);
+
+    for i in 0..16 {
+        tmp[i] = iv[i];
+        print!("0x{:X}\t", tmp[i]);
+    }
+    println!("\n");
 
     cryptoimpl::aes::encrypt_block(&mut iv, &mut test);
+
+    cryptoimpl::aes::decrypt_block(&mut iv, &mut test);
+
+    for i in 0..16 {
+        print!("0x{:X}\t", iv[i]);
+    }
+    println!("\n");
+
 
     let encrypted_data = encrypt(message.as_bytes(), &key, &iv).ok().unwrap();
     let decrypted_data = decrypt(&encrypted_data[..], &key, &iv).ok().unwrap();
