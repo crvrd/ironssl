@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["David Greer <greerdavidc@gmail.com>"]
 
 [dependencies]
-rust-crypto = "*"
 rand = "*"
+rust-crypto = "*"
 
 [dependencies.cryptoimpl]
 path = "../cryptoimpl"

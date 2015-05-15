@@ -24,7 +24,7 @@ fn encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetricciphe
     // Create an encryptor instance of the best performing
     // type available for the platform.
     let mut encryptor = aes::cbc_encryptor(
-            aes::KeySize::KeySize256,
+            aes::KeySize::KeySize128,
             key,
             iv,
             blockmodes::PkcsPadding);
@@ -86,7 +86,7 @@ fn encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetricciphe
 // being performed. However, such code would make this example less clear.
 fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
     let mut decryptor = aes::cbc_decryptor(
-            aes::KeySize::KeySize256,
+            aes::KeySize::KeySize128,
             key,
             iv,
             blockmodes::PkcsPadding);
@@ -109,9 +109,12 @@ fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symm
 }
 
 fn main() {
-    let message = "Cry Havoc, and let slip the dogs of war!";
+    let message = "Cry";
 
-    let mut key: [u8; 32] = [0; 32];
+    let mut key: [u8; 16] = [0x39, 0x28, 0xF8, 0x60,
+                             0xd8, 0x8a, 0x89, 0x1d,
+                             0x3e, 0xb5, 0xc8, 0x7a,
+                             0x71, 0x83, 0x29, 0x08];
     let mut test: [u8; 16] = [0xF0, 0xDD, 0xC8, 0x54, 0xB7, 0x6B, 0x67, 0xB3, 0x87, 0x38, 0xE6, 0x5, 0x36, 0x82, 0xD9, 0xA2];
     let mut iv: [u8; 16] = [0xdb, 0xf2, 0x01, 0xd4, 
                             0x13, 0x0a, 0x01, 0xd4, 
@@ -126,11 +129,11 @@ fn main() {
     // a password. For the purposes of this example, the key and
     // iv are just random values.
     let mut rng = rand::thread_rng();
-    rng.fill_bytes(&mut key);
+    //rng.fill_bytes(&mut key);
     //rng.fill_bytes(&mut iv);
     //rng.fill_bytes(&mut test);
 
-    cryptoimpl::aes::run_tests(&mut iv);
+    //cryptoimpl::aes::run_tests(&mut iv);
 
     for i in 0..16 {
         tmp[i] = iv[i];
@@ -149,7 +152,9 @@ fn main() {
 
 
     let encrypted_data = encrypt(message.as_bytes(), &key, &iv).ok().unwrap();
+    let myencrypted = cryptoimpl::aes::cbc_encrypt(message.as_bytes(), &key, &iv);
     let decrypted_data = decrypt(&encrypted_data[..], &key, &iv).ok().unwrap();
+    let mydecrypted = cryptoimpl::aes::cbc_decrypt(&myencrypted[..], &key, &iv);
 
     let epath = Path::new("encrypted.txt");
 
@@ -163,6 +168,18 @@ fn main() {
         Ok(_) => println!("successfully wrote to {}", epath.display()),
     }
 
+    let mpath = Path::new("myencrypted.txt");
+
+    let mut file = match File::create(&mpath) {
+        Err(why) => panic!("couldn't create file {}: {}", mpath.display(), why),
+        Ok(stuff) => stuff,
+    };
+
+    match file.write_all(&myencrypted) {
+        Err(why) => panic!("couldn't write to {}: {}", mpath.display(), why),
+        Ok(_) => println!("successfully wrote to {}", mpath.display()),
+    }
+
     let dpath = Path::new("decrypted.txt");
 
     let mut file = match File::create(&dpath) {
@@ -174,6 +191,24 @@ fn main() {
         Err(why) => panic!("couldn't write to {}: {}", dpath.display(), why),
         Ok(_) => println!("successfully wrote to {}", dpath.display()),
     }
+
+    let lpath = Path::new("mydecrypted.txt");
+
+    let mut file = match File::create(&lpath) {
+        Err(why) => panic!("couldn't create file {}: {}", lpath.display(), why),
+        Ok(file) => file,
+    };
+
+    match file.write_all(&mydecrypted) {
+        Err(why) => panic!("couldn't write to {}: {}", lpath.display(), why),
+        Ok(_) => println!("successfully wrote to {}", lpath.display()),
+    }
+
+    for i in 0..encrypted_data.len() {
+        println!("0x{:X}\t0x{:X}", encrypted_data[i], myencrypted[i]);
+    }
+
+    assert!(encrypted_data.len() == myencrypted.len());
 
     assert!(message.as_bytes() == &decrypted_data[..]);
 }
