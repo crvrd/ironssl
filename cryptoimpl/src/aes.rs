@@ -165,7 +165,7 @@ pub fn decrypt_block(data: &mut[u8; 16], key: &mut [u8; 16]) {
 }
 
 fn print_data(data: &mut [u8; 16]) {
-    for i in 0..16 {
+    for i in 0..data.len() {
         print!("0x{:X}\t", data[i]);
         if i%4 == 3 {
             println!("");
@@ -178,6 +178,7 @@ pub fn run_tests(data: &mut [u8; 16]) {
     test_mix_cols(data);
     test_sub_bytes(data);
     test_shift_rows(data);
+    test_pkcs_pad();
 }
 
 pub fn test_mix_cols(data: &mut [u8; 16]) {
@@ -220,4 +221,54 @@ pub fn test_shift_rows(data: &mut [u8; 16]) {
     inv_shift_rows(data);
 
     print_data(data);
+}
+
+pub fn pkcs_pad(data: &mut Vec<u8>) {
+    let bytes: usize = 16 - data.len()%16;
+    let newlen = data.len() + bytes;
+    for i in data.len()..newlen {
+        data.push(bytes as u8);
+    }
+}
+
+pub fn pkcs_unpad(data: &mut Vec<u8>) {
+    let removenum = data[data.len()-1];
+    for i in 0..removenum {
+        data.pop();
+    }
+}
+
+pub fn test_pkcs_pad() {
+    println!("Testing PKCS Padding:");
+
+
+    let mut data = vec![0,6,7,8,4,23,4,3,6,1];
+
+    for i in 0..data.len() {
+        print!("0x{:X}\t", data[i]);
+        if i%4 == 3 {
+            println!("");
+        }
+    }
+    println!("\n");
+
+    pkcs_pad(&mut data);
+
+    for i in 0..data.len() {
+        print!("0x{:X}\t", data[i]);
+        if i%4 == 3 {
+            println!("");
+        }
+    }
+    println!("\n");
+
+    pkcs_unpad(&mut data);
+
+    for i in 0..data.len() {
+        print!("0x{:X}\t", data[i]);
+        if i%4 == 3 {
+            println!("");
+        }
+    }
+    println!("\n");
 }

@@ -130,7 +130,7 @@ fn main() {
     //rng.fill_bytes(&mut iv);
     //rng.fill_bytes(&mut test);
 
-    //cryptoimpl::aes::run_tests(&mut iv);
+    cryptoimpl::aes::run_tests(&mut iv);
 
     for i in 0..16 {
         tmp[i] = iv[i];
