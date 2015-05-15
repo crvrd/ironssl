@@ -1,58 +1,46 @@
-use std::net::tcp;
-use std::net::ip;
-use std::task;
-use std::uv;
-extern crate pipes;
-use pipes::{stream, Port, Chan};
- 
-type ConnectMsg = (tcp::TcpNewConnection, core::oldcomm::Chan<Option<tcp::TcpErrData>>);
+// Server Demo
+
+use std::net::{TcpListener, TcpStream};
+use std::thread;
+use std::io::prelude::*;
+
+// gen certificate via:
+// openssl req -new -x509 -key privkey.pem -out cacert.pem -days 1095
+
+fn handle_client(mut stream: TcpStream) {
+	// let mut buf : [u8] = [0; 1024];
+	// let mut s = "hello".to_string();
+	// let mut buf = s.as_bytes();
+	// stream.read(buf);
+	// println!("{:?}", buf);
+
+	// let s = "hello".to_string();
+	// buf = s.as_bytes();
+ //    stream.write(buf);
+ 	println!("Hello World");
+}
 
 fn main() {
-	//Connection information will be transmitted using this Port and Chan
-	let (port, chan): (Port<ConnectMsg>, Chan<ConnectMsg>) = stream();
-	
-	//A separate task handles connections
-	spawn( {
-		loop {
-			let (conn, kill_ch) = port.recv();
-			log(info, "a new connection");
-			match tcp::accept(conn) {
-				result::Err(err) => {
-					log(error, "Connection error");
-					kill_ch.send(Some(err));
-				},
-				result::Ok(socket) => {
-					log(info, "Connection accepted");
-					let peer_addr = ip::format_addr(&socket.get_peer_addr());
-					
-					let socket_buf = tcp::socket_buf(socket);
-					let socket_read = (socket_buf as io::ReaderUtil);
-					let socket_write = (socket_buf as io::WriterUtil);
-					
-					socket_write.write_str("Hello from server\n");
-					println!("{}> {}", peer_addr, socket_read.read_line());
-					socket_write.write_str("Goodbye from server\n");
-				}
-			}
-		}
-	});
+    // bind listener
+    let listener = TcpListener::bind("127.0.0.1:4000").unwrap();
 
-	//Listen for incomming connections
-	tcp::listen(
-		ip::v4::parse_addr("127.0.0.1"),
-		7777,
-		5,
-		uv::global_loop::get(),
-		|_| {
-			//This callback passes the kill channel
-			log(info, "server is listening")
-		},
-		|conn, kill_ch| {
-			/* This callback executes when a connection is received
-			 * The connection must be accepted from another task or
-			 * the server will block.
-			 */
-			chan.send((conn, kill_ch));
-		}
-	);
+    // accept connections, spawn new threads to handle
+    for stream in listener.incoming() {
+        match stream {
+            Err(e) => {
+                // connection failed
+                println!("incoming: have error {}", e);
+            }
+
+            Ok(stream) => {
+            	thread::spawn(move|| {
+	                // connection succeeded
+	                handle_client(stream)
+            	}); 
+            }
+        }
+    }
+
+    // close server socket
+    drop(listener);
 }
