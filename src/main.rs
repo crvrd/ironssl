@@ -1,4 +1,3 @@
-// act as a client, running tests
 mod hmac;
 mod dh;
 mod aes;
@@ -45,7 +44,8 @@ fn main() {
 
 	/* TEST AES */
 	{
-		let aes_message = "Cry Havoc, and let slip the dogs of war";
+		println!("Testing AES...\n");
+		let aes_message: Vec<u8> = b"Cry Havoc, and let slip the dogs of war".to_vec();
 		let aes_password = "testpass";
 
 		let mut aes_key: [u8; 16] = [0; 16];
@@ -58,10 +58,10 @@ fn main() {
 
 		let sparams = scrypt::ScryptParams::new(4, 5, 6);
 
-		scrypt::scrypt(password.as_bytes(), &aes_salt, &sparams, &mut aes_key);
+		scrypt::scrypt(aes_password.as_bytes(), &aes_salt, &sparams, &mut aes_key);
 
-		let encrypted_data = aes::cbc_encrypt(aes_message.as_bytes(), &aes_key, &aes_iv);
-		let decrypted_data = aes::cbc_decrypt(encrypted_data.as_bytes(), &aes_key, &aes_iv);
+		let encrypted_data = aes::cbc_encrypt(&aes_message, &aes_key, &aes_iv);
+		let decrypted_data = aes::cbc_decrypt(&encrypted_data, &aes_key, &aes_iv);
 
 		println!("AES Encrypted Data: {:?}", encrypted_data);
 		println!("AES Decrypted Data: {:?}", decrypted_data);

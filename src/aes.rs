@@ -321,7 +321,7 @@ pub fn pkcs_unpad(data: &mut Vec<u8>) {
     }
 }
 
-pub fn cbc_encrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
+pub fn cbc_encrypt(data: &Vec<u8>, k: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
     let mut blockdata: [u8; 16] = [0; 16];
@@ -353,7 +353,7 @@ pub fn cbc_encrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
     finaldata
 }
 
-pub fn cbc_decrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
+pub fn cbc_decrypt(data: &Vec<u8>, k: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
     let mut blockdata: [u8; 16] = [0; 16];
@@ -388,7 +388,7 @@ pub fn cbc_decrypt(data: &[u8], k: &[u8], iv: &[u8]) -> Vec<u8> {
     finaldata
 }
 
-pub fn ecb_encrypt(data: &[u8], k: &[u8]) -> Vec<u8> {
+pub fn ecb_encrypt(data: &Vec<u8>, k: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
     let mut blockdata: [u8; 16] = [0; 16];
@@ -417,7 +417,7 @@ pub fn ecb_encrypt(data: &[u8], k: &[u8]) -> Vec<u8> {
     finaldata
 }
 
-pub fn ecb_decrypt(data: &[u8], k: &[u8]) -> Vec<u8> {
+pub fn ecb_decrypt(data: &Vec<u8>, k: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
     let mut blockdata: [u8; 16] = [0; 16];

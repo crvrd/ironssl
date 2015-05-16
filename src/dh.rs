@@ -134,7 +134,7 @@ pub fn demo_dh(p : u64, g : u64, a : u64, b : u64) -> u64
 
 	if shared_1 == shared_2
 	{
-		println!("Shared key established: {}", shared_1);
+		println!("Shared key established: {}\n", shared_1);
 	}
 
 	return shared_1;
