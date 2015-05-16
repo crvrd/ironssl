@@ -103,11 +103,6 @@ fn is_primitive(p : u64, g : u64) -> bool
 	return ret;
 }
 
-// fn generate_prime()
-// {
-// 	println!("hello");
-// }
-
 // returns shared key
 // checks if things are valid, then returns b^a_sec mod p
 fn compute_shared_key(p : u64, g : u64, a_sec : u64, b : u64) -> u64

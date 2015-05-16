@@ -1,3 +1,6 @@
+// All of these are constants used by AES
+
+// s-box
 static SBOX: [u8; 256] =
 [
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -18,6 +21,7 @@ static SBOX: [u8; 256] =
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
 ];
 
+// inverted s-box
 static ISBOX: [u8; 256] = 
 [
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
@@ -38,6 +42,7 @@ static ISBOX: [u8; 256] =
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 ];
 
+// multiplication matrices
 static MUL2: [u8; 256] = 
 [
     0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0e, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e,
@@ -160,6 +165,7 @@ static MUL14: [u8; 256] =
 
 static RCON: [u8; 10] = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
 
+// Substitution step - sub bytes out through the s-box
 fn sub_bytes(data: &mut [u8; 16]) {
     for i in (0..data.len()) {
         data[i] = SBOX[data[i] as usize];
@@ -172,8 +178,10 @@ fn inv_sub_bytes(data: &mut [u8; 16]) {
     }
 }
 
+// Shift rows step - shift rows varying amounts
 fn shift_rows(data: &mut [u8; 16]) {
-    // AES uses column-major ordering
+    // AES uses column-major ordering, while we use row-major.
+    // That is why it looks like we shift columns
     let tmp: [u8; 16] =  
     [
         data[0],  data[5],  data[10],  data[15],
@@ -201,6 +209,7 @@ fn inv_shift_rows(data: &mut [u8; 16]) {
     }
 }
 
+// Mix columns - multiply columns by a matrix
 fn mix_cols(data: &mut [u8; 16]) {
     let mut tmp: [usize; 16] = [0; 16];
     for i in 0..16 {
@@ -239,12 +248,14 @@ fn inv_mix_cols(data: &mut [u8; 16]) {
 
 }
 
+// xor the data with the current round key
 fn add_round_key(data: &mut[u8; 16], key: &[u8; 16]) {
     for i in 0..data.len() {
         data[i] = data[i] ^ key[i];
     }
 }
 
+// use the Rijndael key schedule to create round keys
 fn schedule_keys(key: & [u8; 16]) -> [[u8; 16]; 11] {
     let mut roundkeys: [[u8; 16]; 11] = [[0; 16]; 11];
     let keys = 11;
@@ -276,6 +287,7 @@ fn schedule_keys(key: & [u8; 16]) -> [[u8; 16]; 11] {
     roundkeys
 }
 
+// AES encryption core - encrypt a block of 16 bytes
 pub fn encrypt_block(data: &mut[u8; 16], roundkeys: &[[u8; 16]; 11]) {
     add_round_key(data, &roundkeys[0]);
 
@@ -305,7 +317,7 @@ pub fn decrypt_block(data: &mut[u8; 16], roundkeys: &[[u8; 16]; 11]) {
     add_round_key(data, &roundkeys[0]);
 }
 
-
+// pkcs padding - uses pkcs#7
 pub fn pkcs_pad(data: &mut Vec<u8>) {
     let bytes: usize = 16 - data.len()%16;
     let newlen = data.len() + bytes;
@@ -321,6 +333,7 @@ pub fn pkcs_unpad(data: &mut Vec<u8>) {
     }
 }
 
+// encrypt using cipher block chaining
 pub fn cbc_encrypt(data: &Vec<u8>, k: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
@@ -340,6 +353,7 @@ pub fn cbc_encrypt(data: &Vec<u8>, k: &[u8], iv: &[u8]) -> Vec<u8> {
 
     let roundkeys: [[u8; 16]; 11] = schedule_keys(&key);
 
+    // At each step, xor with the result of the previous step
     for i in 0..(vdata.len()/16) {
         for j in 0..16 {
             blockdata[j] = vdata[i*16 + j] ^ old[j];
@@ -388,6 +402,7 @@ pub fn cbc_decrypt(data: &Vec<u8>, k: &[u8], iv: &[u8]) -> Vec<u8> {
     finaldata
 }
 
+// encrypt using electronic code book AES
 pub fn ecb_encrypt(data: &Vec<u8>, k: &[u8]) -> Vec<u8> {
     let mut vdata: Vec<u8> = Vec::new();
     let mut finaldata: Vec<u8> = Vec::new();
