@@ -53,15 +53,15 @@ fn main() {
 		let mut aes_iv: [u8; 16] = [0; 16];
 
 		let mut rng = rand::thread_rng();
-		rng.fill_bytes(&mut iv);
-		rng.fill_bytes(&mut salt);
+		rng.fill_bytes(&mut aes_iv);
+		rng.fill_bytes(&mut aes_salt);
 
 		let sparams = scrypt::ScryptParams::new(4, 5, 6);
 
-		scrypt::scrypt(password.as_bytes(), &salt, &sparams, &mut key);
+		scrypt::scrypt(password.as_bytes(), &aes_salt, &sparams, &mut aes_key);
 
-		let encrypted_data = aes::cbc_encrypt(message.as_bytes(), &key, &iv);
-		let decrypted_data = aes::cbc_decrypt(encrypted_data.as_bytes(), &key, &iv);
+		let encrypted_data = aes::cbc_encrypt(aes_message.as_bytes(), &aes_key, &aes_iv);
+		let decrypted_data = aes::cbc_decrypt(encrypted_data.as_bytes(), &aes_key, &aes_iv);
 
 		println!("AES Encrypted Data: {:?}", encrypted_data);
 		println!("AES Decrypted Data: {:?}", decrypted_data);
