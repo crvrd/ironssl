@@ -1,0 +1,13 @@
+[package]
+name = "basic-ssl"
+version = "0.1.0"
+authors = ["Anit Gandhi <anitgandhi>",
+		   "David Greer <crvrd>",
+		   "Bart Kosciarz <bkosciarz>",
+		   "Bo DellMaria <bojdell>"]
+
+[dependencies]
+rand = "*"
+num = "*"
+shaman = "*"
+rust-crypto = "*"
