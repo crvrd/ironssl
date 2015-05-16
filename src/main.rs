@@ -65,5 +65,7 @@ fn main() {
 
 		println!("AES Encrypted Data: {:?}", encrypted_data);
 		println!("AES Decrypted Data: {:?}", decrypted_data);
+		assert!(aes_message == decrypted_data);
+		println!("AES test passed");
 	}
 }
