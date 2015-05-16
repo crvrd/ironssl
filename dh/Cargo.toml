@@ -1,8 +1,0 @@
-[package]
-name = "dh"
-version = "0.1.0"
-authors = ["anitgandhi <anitgandhi@gmail.com>"]
-
-[dependencies]
-rand = "*"
-num = "*"
