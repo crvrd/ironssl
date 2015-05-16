@@ -4,10 +4,9 @@ mod dh;
 mod aes;
 
 extern crate rand;
-extern crate rust-crypto;
+extern crate crypto;
 
-use crypto::{ symmetriccipher, buffer, aes, blockmodes, scrypt };
-use crypto::buffer::{ ReadBuffer, WriteBuffer, BufferResult };
+use crypto::scrypt;
 use rand::Rng;
 
 fn main() {
