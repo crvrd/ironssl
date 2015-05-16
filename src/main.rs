@@ -63,8 +63,11 @@ fn main() {
 		let encrypted_data = aes::cbc_encrypt(&aes_message, &aes_key, &aes_iv);
 		let decrypted_data = aes::cbc_decrypt(&encrypted_data, &aes_key, &aes_iv);
 
-		println!("AES Encrypted Data: {:?}", encrypted_data);
-		println!("AES Decrypted Data: {:?}", decrypted_data);
+		print!("Encrypted data: ");
+		for i in 0..encrypted_data.len() {
+			print!("{:x}", encrypted_data[i]);
+		}
+		println!("");
 		assert!(aes_message == decrypted_data);
 		println!("AES test passed");
 	}
